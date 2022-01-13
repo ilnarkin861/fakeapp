@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using MediatR;
 
 
@@ -10,10 +9,7 @@ namespace FakeApp.Application.Albums.Commands
     /// </summary>
     public class PhotoDeleteCommand : IRequest<bool>
     {
-        [Required(ErrorMessage = "Album id is required")]
         public int AlbumId { get; set; }
-        
-        [Required(ErrorMessage = "Photo id is required")]
         public int PhotoId { get; set; }
     }
 }
