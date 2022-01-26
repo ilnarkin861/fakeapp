@@ -76,7 +76,8 @@ namespace FakeApp.Application.Albums.Services
         }
 
         
-        public async Task<PaginationResponse> GetUserAlbumsListAsync(int offset, int limit, HttpContext httpContext)
+        public async Task<PaginationResponse> GetUserAlbumsListAsync(int offset, int limit, 
+            HttpContext httpContext)
         {
             var user = await GetCurrentUser(httpContext);
 
@@ -138,21 +139,22 @@ namespace FakeApp.Application.Albums.Services
         {
             var user = await GetCurrentUser(httpContext);
 
-            var albumExists = await DbContext.Albums.AnyAsync(a => a.Id == album.Id && a.User == user);
+            var editableAlbum = await DbContext.Albums
+                .FirstOrDefaultAsync(a => a.Id == album.Id && a.User.Id == user.Id);
 
-            if (!albumExists)
+            if (editableAlbum == null)
             {
                 throw new RestException("Not found album for update");
             }
 
-            album.UserId = user.Id;
-                
-            album.Cover ??= await DbContext.Albums
-                .Where(a => a.Id == album.Id)
-                .Select(a => a.Cover)
-                .FirstOrDefaultAsync();
+            editableAlbum.Title = album.Title;
 
-            DbContext.Update(album);
+            if (album.Cover != null)
+            {
+                editableAlbum.Cover = album.Cover;
+            }
+
+            DbContext.Update(editableAlbum);
 
             await DbContext.SaveChangesAsync();
 

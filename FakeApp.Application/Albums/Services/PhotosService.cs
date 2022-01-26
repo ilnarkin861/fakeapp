@@ -59,7 +59,8 @@ namespace FakeApp.Application.Albums.Services
             
             var photosLimit = limit is 0 or > Settings.UserPhotosLimit ? Settings.UserPhotosLimit : limit;
 
-            var query = DbContext.Photos.AsNoTracking().Where(p => p.AlbumId == albumId && p.Album.User == user);
+            var query = DbContext.Photos.AsNoTracking()
+                .Where(p => p.AlbumId == albumId && p.Album.User == user);
             
             var count = await query.CountAsync();
 

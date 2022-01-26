@@ -137,26 +137,22 @@ namespace FakeApp.Application.Posts.Services
         {
             var user = await GetCurrentUser(httpContext);
 
-            var postExists = await DbContext.Posts.AnyAsync(p => p.Id == post.Id && p.User == user);
+            var editablePost = await DbContext.Posts
+                .FirstOrDefaultAsync(p => p.Id == post.Id && p.User.Id == user.Id);
 
-            if (!postExists)
+            if (editablePost == null)
             {
                 throw new RestException("Not found user post for update");
             }
 
-            post.UserId = user.Id;
+            editablePost.Title = post.Title;
 
-            post.Image ??= await DbContext.Posts
-                .Where(p => p.Id == post.Id)
-                .Select(p => p.Image)
-                .FirstOrDefaultAsync();
+            if (post.Image != null)
+            {
+                editablePost.Image = post.Image;
+            }
 
-            post.CreatedDate = await DbContext.Posts
-                .Where(p => p.Id == post.Id)
-                .Select(p => p.CreatedDate)
-                .FirstOrDefaultAsync();
-
-            DbContext.Update(post);
+            DbContext.Update(editablePost);
 
             await DbContext.SaveChangesAsync();
 
